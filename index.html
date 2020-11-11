@@ -1,39 +1,46 @@
-<!DOCTYPE html>
+<!Doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>getUserMedia-Demo</title>
-</head>
-<body>
+  <head>
+    <title>Camera Test</title>
+    <script type="text/javascript">
 
-<!-- カメラ映像が描画されます。 -->
-<video id="video_area" style="background-color: #000" autoplay></video>
 
-<!-- 押下するとカメラ映像描画を開始します。 -->
-<button id="start_btn">映像表示開始</button>
+      function videoStart(){
+        var constraints = { audio: false, video: { facingMode: "environment" } };
 
-</body>
-<script>
+        navigator.mediaDevices.getUserMedia( constraints )
+        .then(
+          function( stream ) {
+            var video = document.querySelector( 'video' );
+            video.srcObject = stream;
+            video.onloadedmetadata = function( e ) {
+              video.play();
+            };
+          }
+        )
+      };
 
-    // getUserMedia が使えないときは、『getUserMedia()が使えないブラウザだよ』と言ってね。
-    if (typeof navigator.mediaDevices.getUserMedia !== 'function') {
-        const err = new Error('getUserMedia()が使えないブラウザだよ');
-        alert(`${err.name} ${err.message}`);
-        throw err;
-    }
 
-    // 操作する画面エレメント変数定義します。
-    const $start = document.getElementById('start_btn');   // スタートボタン
-    const $video = document.getElementById('video_area');  // 映像表示エリア
+      function videoStop(){
+        var constraints = { audio: false, video: { facingMode: "environment" } };
 
-    // 「スタートボタン」を押下で、getUserMedia を使って映像を「映像表示エリア」に表示するよ。
-    $start.addEventListener('click', () => {
-        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-        .then(stream => $video.srcObject = stream)
-        .catch(err => alert(`${err.name} ${err.message}`));
-    }, false);
+        navigator.mediaDevices.getUserMedia( constraints )
+        .then(
+          function( stream ) {
+            var video = document.querySelector( 'video' );
+            video.srcObject = stream;
+            video.onloadedmetadata = function( e ) {
+              stream.getVideoTracks()[0].stop();
+            };
+          }
+        )
+      };
 
-</script>
-
+    </script>
+  </head>
+  <body>
+    <div><video id="myVideo" autoplay="1" ></video></div> 
+    <div><button type="button" onclick="videoStart()">撮影</button>　
+    <button type="button" onclick="videoStop()">停止</button></div>
+  </body>
 </html>
