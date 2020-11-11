@@ -3,52 +3,34 @@
   <head>
     <title>Camera Test</title>
     <script type="text/javascript">
-        let player = document.getElementById('player');
-        let snapshotCanvas = document.getElementById('snapshot');
-        let width = snapshotCanvas.width;
-        let height = snapshotCanvas.height;
+      const cameraSize = { w: 360, h: 240 };
+      const resolution = { w: 1080, h: 720 };
+      let video;
+      let media;
 
-        let startScan = function(callback) {
-          const canvasContext = snapshotCanvas.getContext("2d");
-          // 500ms間隔でスナップショットを取得し、QRコードの読み取りを行う
-          let intervalHandler = setInterval(() => {
-            canvasContext.drawImage(player, 0, 0, width, height);
-            const imageData = canvasContext.getImageData(0, 0, width, height);
-            const scanResult = jsQR(imageData.data, imageData.width, imageData.height);
+      // video要素をつくる
+      video          = document.createElement('video');
+      video.id       = 'video';
+      video.width    = cameraSize.w;
+      video.height   = cameraSize.h;
+      video.autoplay = true;
+      document.getElementById('videoPreview').appendChild(video);
 
-            if (scanResult) {
-              clearInterval(intervalHandler);
-              console.log(scanResult);
-
-              if (callback) {
-                callback(scanResult);
-              }
-            }
-          }, 500)
-        };
-
-        let handleSuccess = function(stream) {
-          // カメラストリームをプレイヤーのデータに設定
-          player.srcObject = stream;
-
-          startScan((scanResult) => {
-            // このページの呼び出し元に読み取り結果を返す
-          });
-        };
-
-        // このメソッドを呼び出すことでユーザーにブラウザがカメラを使用することを許可するかの確認ダイアログが表示され、
-        // 許可されれば handleSuccess が呼ばれる
-        navigator.mediaDevices.getUserMedia({
-          video: {facingMode: "environment", width: width, height: height},
-          audio: false
-        }).then(handleSuccess)
-        .catch(err => {
-          console.log(JSON.stringify(err));
-        });
+      // video要素にWebカメラの映像を表示させる
+      media = navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          width: { ideal: resolution.w },
+          height: { ideal: resolution.h }
+        }
+      }).then(function(stream) {
+        video.srcObject = stream;
+      });
     </script>
   </head>
   <body>
-    <video id="player" autoplay></video>
-    <canvas id="snapshot" width="480" height="640"></canvas>
+    <div id="videoPreview">
+      <p>video preview</p>
+    </div>
   </body>
 </html>
