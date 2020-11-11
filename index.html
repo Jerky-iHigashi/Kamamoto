@@ -1,76 +1,82 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Camera Test</title>
-  <style>
-  canvas, video{
-    border: 1px solid gray;
-  }
-  </style>
+       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
-<body>
 
-<h1>HTML5カメラ</h1>
+<style>
+#camera {
+ width: 350px;
+     height: 280px;
+     transform: rotateY(180deg);
+}
+#img {
+     width: 350px;
+     height: 280px;
+}
+</style>
 
-<video id="camera" width="300" height="200"></video>
-<canvas id="picture" width="300" height="200"></canvas>
-<form>
-  <button type="button" id="shutter">シャッター</button>
-</form>
 
-<audio id="se" preload="auto">
-  <source src="camera-shutter1.mp3" type="audio/mp3">
-</audio>
-
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script>
-window.onload = () => {
-  const video  = document.querySelector("#camera");
-  const canvas = document.querySelector("#picture");
-  const se     = document.querySelector('#se');
-
-  /** カメラ設定 */
-  const constraints = {
-    audio: false,
-    video: {
-      width: 300,
-      height: 200,
-      facingMode: "user"   // フロントカメラを利用する
-      // facingMode: { exact: "environment" }  // リアカメラを利用する場合
-    }
+<!--
+$(function() {
+  //videoタグを取得
+  var video = document.getElementById('camera');
+  //カメラが起動できたかのフラグ
+  var localMediaStream = null;
+  //カメラ使えるかチェック
+  var hasGetUserMedia = function() {
+          return (navigator.getUserMedia || navigator.webkitGetUserMedia ||
+                 navigator.mozGetUserMedia || navigator.msGetUserMedia);
   };
 
-  /**
-   * カメラを<video>と同期
-   */
-  navigator.mediaDevices.getUserMedia(constraints)
-  .then( (stream) => {
-    video.srcObject = stream;
-    video.onloadedmetadata = (e) => {
-      video.play();
-    };
-  })
-  .catch( (err) => {
-    console.log(err.name + ": " + err.message);
+  //エラー
+  var onFailSoHard = function(e) {
+          console.log('Error!', e);
+          alert("Error !");
+  };
+
+  if(!hasGetUserMedia()) {
+          alert("Unsupported browser.");
+  } else {
+          window.URL = window.URL || window.webkitURL;
+          navigator.getUserMedia  = navigator.getUserMedia ||
+                         navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
+                         navigator.msGetUserMedia;
+          navigator.getUserMedia({video: true}, function(stream) {
+                  video.src = window.URL.createObjectURL(stream);
+                  localMediaStream = stream;
+          }, onFailSoHard);
+  }
+
+  $("#snap").click(function() {
+          if (localMediaStream) {
+                  var canvas = document.getElementById('canvas');
+                  //canvasの描画モードを2sに
+                  var ctx = canvas.getContext('2d');
+                  var img = document.getElementById('img');
+
+                  //videoの縦幅横幅を取得
+                  var w = video.offsetWidth;
+                  var h = video.offsetHeight;
+
+                  //同じサイズをcanvasに指定
+                  canvas.setAttribute("width", w);
+                  canvas.setAttribute("height", h);
+
+                  //canvasにコピー
+                  ctx.drawImage(video, 0, 0, w, h);
+                  //imgにpng形式で書き出し
+                  img.src = canvas.toDataURL('image/png');
+          }
   });
-
-  /**
-   * シャッターボタン
-   */
-   document.querySelector("#shutter").addEventListener("click", () => {
-    const ctx = canvas.getContext("2d");
-
-    // 演出的な目的で一度映像を止めてSEを再生する
-    video.pause();  // 映像を停止
-    se.play();      // シャッター音
-    setTimeout( () => {
-      video.play();    // 0.5秒後にカメラ再開
-    }, 500);
-
-    // canvasに画像を貼り付ける
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  });
-};
+});
+//-->
 </script>
+<body>
+        <video id="camera" autoplay></video><br>
+        <img id="img">
+        <div style="display:none"><canvas id="canvas"></canvas></div>
 </body>
 </html>
