@@ -3,44 +3,39 @@
   <head>
     <title>Camera Test</title>
     <script type="text/javascript">
-
-
-      function videoStart(){
-        var constraints = { audio: false, video: { facingMode: "environment" } };
-
-        navigator.mediaDevices.getUserMedia( constraints )
-        .then(
-          function( stream ) {
-            var video = document.querySelector( 'video' );
-            video.srcObject = stream;
-            video.onloadedmetadata = function( e ) {
-              video.play();
-            };
+      const medias = {
+          audio: false,
+          video: {
+            facingMode: "user"
           }
-        )
-      };
+        };
+        const video = document.getElementById("video");
+        const promise = navigator.mediaDevices.getUserMedia(medias);
 
+        promise.then(successCallback)
+               .catch(errorCallback);
 
-      function videoStop(){
-        var constraints = { audio: false, video: { facingMode: "environment" } };
+        function successCallback(stream) {
+          video.srcObject = stream;
+        };
 
-        navigator.mediaDevices.getUserMedia( constraints )
-        .then(
-          function( stream ) {
-            var video = document.querySelector( 'video' );
-            video.srcObject = stream;
-            video.onloadedmetadata = function( e ) {
-              stream.getVideoTracks()[0].stop();
-            };
-          }
-        )
-      };
-
+        function errorCallback(err) {
+          alert(err);
+        };
     </script>
   </head>
   <body>
-    <div><video id="myVideo" autoplay="1" ></video></div> 
-    <div><button type="button" onclick="videoStart()">撮影</button>　
-    <button type="button" onclick="videoStop()">停止</button></div>
+    <style>
+      body {
+        margin: 0;
+        background: #000;
+      }
+
+      #video {
+        display: block;
+        width: 100%;
+      }
+    </style>
+    <video id="video" autoplay playsinline></video>
   </body>
 </html>
